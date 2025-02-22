@@ -1,0 +1,76 @@
+/* formStyle.css */
+
+/* Container principal */
+.form-container {
+  max-width: 600px;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: var(--neutral-color);
+}
+
+/* Cartão de formulário */
+.card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  margin-bottom: 20px;
+}
+
+/* Títulos */
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: var(--primary-color);
+}
+
+/* Labels do formulário */
+.form-label {
+  font-weight: 500;
+  color: #333333;
+}
+
+/* Inputs do formulário */
+.form-control {
+  border-radius: 5px;
+  border: 1px solid #cccccc;
+  padding: 10px;
+  font-size: 16px;
+  color: #333333;
+}
+
+.form-control:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Restringir campos numéricos para aceitar apenas números */
+.form-control[type="text"][pattern="\\d*"] {
+  ime-mode: disabled; /* Desabilitar modo de entrada de caracteres */
+}
+
+/* Feedback de validação */
+.is-invalid {
+  border-color: #dc3545;
+  box-shadow: none;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 14px;
+}
+
+/* Botão de submit */
+.btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.btn-primary:hover {
+  background-color: var(--secondary-color);
+  border-color: #004085;
+}

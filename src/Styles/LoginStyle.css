@@ -1,0 +1,75 @@
+/* LoginStyle.css */
+
+/* Container principal */
+.login-container {
+  width: 100%;
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 20px;
+}
+
+/* Cartão de formulário */
+.login-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  width: 100%;
+  max-width: 400px;
+}
+
+/* Títulos */
+.login-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+  text-align: center;
+  color: #007bff;
+}
+
+/* Labels do formulário */
+.form-label {
+  font-weight: 500;
+  color: #333333;
+}
+
+/* Inputs do formulário */
+.form-control {
+  border-radius: 5px;
+  border: 1px solid #cccccc;
+  padding: 10px;
+  font-size: 16px;
+  color: #333333;
+}
+
+.form-control:focus {
+  border-color: #007bff;
+  box-shadow: 0 0 5px rgba(0, 123, 255, 0.25);
+}
+
+/* Feedback de validação */
+.is-invalid {
+  border-color: #dc3545;
+  box-shadow: none;
+}
+
+.invalid-feedback {
+  color: #dc3545;
+  font-size: 14px;
+}
+
+/* Botão de submit */
+.btn-primary {
+  background-color: #007bff;
+  border-color: #007bff;
+  padding: 10px 20px;
+  font-size: 16px;
+  border-radius: 5px;
+}
+
+.btn-primary:hover {
+  background-color: #0056b3;
+  border-color: #004085;
+}
