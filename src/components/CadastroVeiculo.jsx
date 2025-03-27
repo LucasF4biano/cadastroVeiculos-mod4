@@ -1,32 +1,65 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { Container, Table, Button } from "react-bootstrap";
+import api from "./api"; // Configuração do Axios
 
 const CadastroVeiculo = () => {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const [veiculos, setVeiculos] = useState([]);
+  const [fornecedores, setFornecedores] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
 
+  // Carregar veículos e fornecedores do backend ao montar o componente
+  useEffect(() => {
+    api.get("/veiculos")
+      .then((response) => setVeiculos(response.data))
+      .catch((error) => console.error("Erro ao carregar veículos:", error));
+    api.get("/fornecedores")
+      .then((response) => setFornecedores(response.data))
+      .catch((error) => console.error("Erro ao carregar fornecedores:", error));
+  }, []);
+
+  // Função para cadastrar ou atualizar veículos
   const onSubmit = (data) => {
     if (editIndex !== null) {
-      const updatedVeiculos = [...veiculos];
-      updatedVeiculos[editIndex] = data;
-      setVeiculos(updatedVeiculos);
-      setEditIndex(null);
+      const veiculo = veiculos[editIndex];
+      api.put(`/veiculos/${veiculo.id}`, data) // Atualizar veículo no backend
+        .then(() => {
+          const updatedVeiculos = [...veiculos];
+          updatedVeiculos[editIndex] = { ...veiculo, ...data };
+          setVeiculos(updatedVeiculos);
+          setEditIndex(null);
+          reset();
+        })
+        .catch((error) => console.error("Erro ao atualizar veículo:", error));
     } else {
-      setVeiculos([...veiculos, data]);
+      api.post("/veiculos", data) // Cadastrar novo veículo no backend
+        .then((response) => {
+          setVeiculos([...veiculos, response.data]);
+          reset();
+        })
+        .catch((error) => console.error("Erro ao cadastrar veículo:", error));
     }
-    reset();
   };
 
+  // Função para preencher o formulário com os dados do veículo para edição
   const handleEdit = (index) => {
     const veiculo = veiculos[index];
     Object.keys(veiculo).forEach((key) => setValue(key, veiculo[key]));
     setEditIndex(index);
   };
 
+  // Função para excluir veículos
   const handleDelete = (index) => {
-    setVeiculos(veiculos.filter((_, i) => i !== index));
+    const veiculo = veiculos[index];
+    api.delete(`/veiculos/${veiculo.id}`) // Enviar requisição DELETE para o backend
+      .then(() => {
+        setVeiculos(veiculos.filter((_, i) => i !== index)); // Atualizar estado local
+      })
+      .catch((error) => {
+        console.error("Erro ao excluir veículo:", error);
+        alert("Erro ao excluir veículo. Tente novamente.");
+      });
   };
 
   return (
@@ -99,6 +132,22 @@ const CadastroVeiculo = () => {
             {errors.cor && <div className="invalid-feedback">{errors.cor.message}</div>}
           </div>
 
+          <div className="mb-3">
+            <label className="form-label">Fornecedor:</label>
+            <select
+              className={`form-control ${errors.fornecedor_id ? "is-invalid" : ""}`}
+              {...register("fornecedor_id", { required: "O fornecedor é obrigatório" })}
+            >
+              <option value="">Selecione um fornecedor</option>
+              {fornecedores.map((fornecedor) => (
+                <option key={fornecedor.id} value={fornecedor.id}>
+                  {fornecedor.nome}
+                </option>
+              ))}
+            </select>
+            {errors.fornecedor_id && <div className="invalid-feedback">{errors.fornecedor_id.message}</div>}
+          </div>
+
           <button type="submit" className="btn btn-primary w-100">
             {editIndex !== null ? "Atualizar" : "Cadastrar"}
           </button>
@@ -115,6 +164,7 @@ const CadastroVeiculo = () => {
               <th>Marca</th>
               <th>Ano</th>
               <th>Cor</th>
+              <th>Fornecedor</th>
               <th>Ações</th>
             </tr>
           </thead>
@@ -126,6 +176,7 @@ const CadastroVeiculo = () => {
                 <td>{veiculo.marca}</td>
                 <td>{veiculo.ano}</td>
                 <td>{veiculo.cor}</td>
+                <td>{veiculo.fornecedor}</td>
                 <td>
                   <Button variant="warning" size="sm" className="me-2" onClick={() => handleEdit(index)}>Editar</Button>
                   <Button variant="danger" size="sm" onClick={() => handleDelete(index)}>Excluir</Button>

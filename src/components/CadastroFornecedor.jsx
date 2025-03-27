@@ -1,16 +1,24 @@
-import React, { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { cnpj } from "cpf-cnpj-validator";
 import { Container, Table, Button } from "react-bootstrap";
-import "../styles/FormStyle.css"; // Estilos adicionais
+import api from "./api"; // Arquivo Axios para chamadas HTTP
+import "../styles/FormStyle.css"; // Estilos personalizados
 
 const CadastroFornecedor = () => {
   const { register, handleSubmit, reset, setValue, formState: { errors } } = useForm();
   const [fornecedores, setFornecedores] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
 
+  // Carregar fornecedores do backend ao montar o componente
+  useEffect(() => {
+    api.get("/fornecedores")
+      .then((response) => setFornecedores(response.data))
+      .catch((error) => console.error("Erro ao carregar fornecedores:", error));
+  }, []);
+
   const handleTelefoneChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length <= 2) {
       value = `(${value}`;
     } else if (value.length <= 6) {
@@ -22,33 +30,41 @@ const CadastroFornecedor = () => {
   };
 
   const handleCnpjChange = (e) => {
-    let value = e.target.value.replace(/\D/g, ""); // Remove tudo que não for número
-  
+    let value = e.target.value.replace(/\D/g, "");
     if (value.length <= 2) {
-      value = value.slice(0, 2); // Exibe os primeiros 2 dígitos
+      value = value.slice(0, 2);
     } else if (value.length <= 5) {
-      value = `${value.slice(0, 2)}.${value.slice(2, 5)}`; // Formato xx.xxx
+      value = `${value.slice(0, 2)}.${value.slice(2, 5)}`;
     } else if (value.length <= 8) {
-      value = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 8)}`; // Formato xx.xxx.xxx
+      value = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 8)}`;
     } else if (value.length <= 12) {
-      value = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 8)}/${value.slice(8, 12)}`; // Formato xx.xxx.xxx/xxxx
+      value = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 8)}/${value.slice(8, 12)}`;
     } else {
-      value = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 8)}/${value.slice(8, 12)}-${value.slice(12, 14)}`; // Formato xx.xxx.xxx/xxxx-xx
+      value = `${value.slice(0, 2)}.${value.slice(2, 5)}.${value.slice(5, 8)}/${value.slice(8, 12)}-${value.slice(12, 14)}`;
     }
-  
     e.target.value = value;
   };
 
   const onSubmit = (data) => {
     if (editIndex !== null) {
-      const updatedFornecedores = [...fornecedores];
-      updatedFornecedores[editIndex] = data;
-      setFornecedores(updatedFornecedores);
-      setEditIndex(null);
+      const fornecedor = fornecedores[editIndex];
+      api.put(`/fornecedores/${fornecedor.id}`, data)
+        .then(() => {
+          const updatedFornecedores = [...fornecedores];
+          updatedFornecedores[editIndex] = { ...fornecedor, ...data };
+          setFornecedores(updatedFornecedores);
+          setEditIndex(null);
+          reset();
+        })
+        .catch((error) => console.error("Erro ao atualizar fornecedor:", error));
     } else {
-      setFornecedores([...fornecedores, data]);
+      api.post("/fornecedores", data)
+        .then((response) => {
+          setFornecedores([...fornecedores, response.data]);
+          reset();
+        })
+        .catch((error) => console.error("Erro ao cadastrar fornecedor:", error));
     }
-    reset();
   };
 
   const handleEdit = (index) => {
@@ -58,8 +74,19 @@ const CadastroFornecedor = () => {
   };
 
   const handleDelete = (index) => {
-    setFornecedores(fornecedores.filter((_, i) => i !== index));
+    const fornecedor = fornecedores[index]; // Obtém o fornecedor pelo índice
+    api.delete(`/fornecedores/${fornecedor.id}`) // Chamada ao backend usando o ID do fornecedor
+      .then(() => {
+        // Atualiza o estado local removendo o fornecedor da lista
+        setFornecedores(fornecedores.filter((_, i) => i !== index));
+      })
+      .catch((error) => {
+        console.error("Erro ao excluir fornecedor:", error); // Exibe o erro no console
+        alert("Erro ao excluir fornecedor. Por favor, tente novamente.");
+      });
   };
+  
+
 
   return (
     <Container className="form-container">
